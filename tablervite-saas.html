@@ -1,0 +1,1606 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TableVite — SaaS Anti No-Show</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Figtree:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════ */
+:root {
+  --accent: #E8B86D;
+  --accent-dim: rgba(232,184,109,0.12);
+  --accent-mid: rgba(232,184,109,0.25);
+  --radius: 10px;
+  --radius-lg: 16px;
+  --transition: .18s ease;
+}
+
+[data-theme="dark"] {
+  --bg:      #0C0C0D;
+  --bg2:     #131315;
+  --bg3:     #1A1A1D;
+  --bg4:     #222226;
+  --bg5:     #2A2A2F;
+  --line:    rgba(255,255,255,0.06);
+  --line2:   rgba(255,255,255,0.1);
+  --tx:      #F0EDE8;
+  --tx2:     #9B9791;
+  --tx3:     #4E4D4A;
+  --green:   #4ABA7A;
+  --green-bg:rgba(74,186,122,0.1);
+  --red:     #E06060;
+  --red-bg:  rgba(224,96,96,0.1);
+  --blue:    #6EA8F0;
+  --blue-bg: rgba(110,168,240,0.1);
+  --orange:  #F0A040;
+  --orange-bg:rgba(240,160,64,0.1);
+}
+
+[data-theme="light"] {
+  --bg:      #F2EFE9;
+  --bg2:     #FDFAF5;
+  --bg3:     #FFFFFF;
+  --bg4:     #EDE9E1;
+  --bg5:     #E4E0D8;
+  --line:    rgba(0,0,0,0.06);
+  --line2:   rgba(0,0,0,0.1);
+  --tx:      #1A1612;
+  --tx2:     #7A7268;
+  --tx3:     #B5B0A8;
+  --green:   #1E8040;
+  --green-bg:rgba(30,128,64,0.08);
+  --red:     #C04040;
+  --red-bg:  rgba(192,64,64,0.08);
+  --blue:    #1855A0;
+  --blue-bg: rgba(24,85,160,0.08);
+  --orange:  #A06010;
+  --orange-bg:rgba(160,96,16,0.08);
+}
+
+/* ═══════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Figtree', sans-serif;
+  background: var(--bg);
+  color: var(--tx);
+  min-height: 100vh;
+  display: flex;
+  font-size: 14px;
+  line-height: 1.5;
+  transition: background var(--transition), color var(--transition);
+}
+
+/* ═══════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════ */
+.sidebar {
+  width: 220px;
+  min-width: 220px;
+  background: var(--bg2);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  overflow-y: auto;
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* ═══════════════════════════════════════
+   SIDEBAR
+═══════════════════════════════════════ */
+.logo-area {
+  padding: 22px 18px 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.logo {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--tx);
+  letter-spacing: -0.04em;
+}
+.logo em { color: var(--accent); font-style: normal; }
+
+.logo-tag {
+  margin-top: 5px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-dim);
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+.nav { padding: 12px 10px; flex: 1; }
+
+.nav-group-label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--tx3);
+  padding: 10px 8px 5px;
+}
+
+.nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: none;
+  background: none;
+  color: var(--tx2);
+  font-family: 'Figtree', sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  cursor: pointer;
+  text-align: left;
+  transition: all var(--transition);
+  position: relative;
+}
+
+.nav-btn:hover { background: var(--bg3); color: var(--tx); }
+.nav-btn.active { background: var(--accent-dim); color: var(--accent); font-weight: 600; }
+
+.nav-btn svg { width: 15px; height: 15px; flex-shrink: 0; opacity: .75; }
+.nav-btn.active svg { opacity: 1; }
+
+.nav-count {
+  margin-left: auto;
+  background: var(--accent);
+  color: var(--bg);
+  font-size: 0.6rem;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 8px;
+  min-width: 16px;
+  text-align: center;
+}
+
+.sidebar-bottom {
+  padding: 12px 10px;
+  border-top: 1px solid var(--line);
+}
+
+.restaurant-card {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 10px;
+  background: var(--bg3);
+  border: 1px solid var(--line2);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.restaurant-card:hover { border-color: var(--accent); }
+
+.rest-avatar {
+  width: 30px; height: 30px;
+  border-radius: 7px;
+  background: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--bg);
+  flex-shrink: 0;
+}
+
+.rest-info { flex: 1; min-width: 0; }
+.rest-name { font-size: 0.8rem; font-weight: 600; color: var(--tx); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rest-sub { font-size: 0.65rem; color: var(--tx3); margin-top: 1px; }
+
+/* ═══════════════════════════════════════
+   TOPBAR
+═══════════════════════════════════════ */
+.topbar {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--line);
+  padding: 0 28px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.topbar-left h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--tx);
+  letter-spacing: -0.02em;
+}
+.topbar-left span { font-size: 0.7rem; color: var(--tx3); display: block; margin-top: 1px; }
+
+.topbar-right { display: flex; align-items: center; gap: 8px; }
+
+.icon-btn {
+  width: 34px; height: 34px;
+  border-radius: 8px;
+  border: 1px solid var(--line2);
+  background: var(--bg3);
+  color: var(--tx2);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem;
+  transition: all var(--transition);
+}
+.icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+.btn-accent {
+  display: flex; align-items: center; gap: 5px;
+  background: var(--accent);
+  color: #1A1200;
+  border: none;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-family: 'Figtree', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.btn-accent:hover { opacity: .88; transform: translateY(-1px); }
+
+/* ═══════════════════════════════════════
+   CONTENT
+═══════════════════════════════════════ */
+.content { padding: 24px 28px; flex: 1; overflow-y: auto; }
+
+.page { display: none; animation: fadeIn .2s ease; }
+.page.active { display: block; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ═══════════════════════════════════════
+   STAT CARDS
+═══════════════════════════════════════ */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  transition: border-color var(--transition);
+}
+.stat-card:hover { border-color: var(--line2); }
+
+.stat-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+
+.stat-ico {
+  width: 34px; height: 34px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .9rem;
+}
+
+.stat-pill {
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 20px;
+}
+.pill-up { background: var(--green-bg); color: var(--green); }
+.pill-down { background: var(--red-bg); color: var(--red); }
+.pill-neutral { background: var(--bg4); color: var(--tx2); }
+
+.stat-val {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--tx);
+  letter-spacing: -0.04em;
+  line-height: 1;
+  margin-bottom: 3px;
+}
+.stat-lbl { font-size: 0.72rem; color: var(--tx2); }
+
+/* ═══════════════════════════════════════
+   CARDS
+═══════════════════════════════════════ */
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.card-head {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.card-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--tx);
+  letter-spacing: -0.02em;
+}
+.card-sub { font-size: 0.7rem; color: var(--tx3); margin-top: 2px; }
+
+.card-body { padding: 18px; }
+
+/* ═══════════════════════════════════════
+   TABLE
+═══════════════════════════════════════ */
+.tbl-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th {
+  text-align: left;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tx3);
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--line);
+  color: var(--tx2);
+  font-size: 0.8125rem;
+  vertical-align: middle;
+}
+tr:last-child td { border-bottom: none; }
+tbody tr { transition: background var(--transition); }
+tbody tr:hover td { background: var(--bg3); }
+.td-bold { color: var(--tx); font-weight: 600; }
+.td-accent { color: var(--accent); font-weight: 700; font-family: 'Syne', sans-serif; }
+
+/* ═══════════════════════════════════════
+   BADGES
+═══════════════════════════════════════ */
+.badge {
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.bg-green { background: var(--green-bg); color: var(--green); }
+.bg-red   { background: var(--red-bg);   color: var(--red);   }
+.bg-blue  { background: var(--blue-bg);  color: var(--blue);  }
+.bg-orange{ background: var(--orange-bg);color: var(--orange);}
+.bg-muted { background: var(--bg4);      color: var(--tx2);   }
+
+/* ═══════════════════════════════════════
+   BUTTONS SMALL
+═══════════════════════════════════════ */
+.btn-sm {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--line2);
+  background: var(--bg3);
+  color: var(--tx2);
+  font-family: 'Figtree', sans-serif;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+.btn-sm:hover { border-color: var(--accent); color: var(--accent); }
+.btn-sm.red:hover { border-color: var(--red); color: var(--red); }
+.btn-sm.green:hover { border-color: var(--green); color: var(--green); }
+
+/* ═══════════════════════════════════════
+   GRID LAYOUTS
+═══════════════════════════════════════ */
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.g3 { display: grid; grid-template-columns: 3fr 2fr; gap: 16px; }
+
+/* ═══════════════════════════════════════
+   TIMELINE
+═══════════════════════════════════════ */
+.timeline { display: flex; flex-direction: column; }
+.tl-item {
+  display: flex; gap: 12px; padding: 11px 0;
+  border-bottom: 1px solid var(--line);
+  align-items: flex-start;
+}
+.tl-item:last-child { border-bottom: none; padding-bottom: 0; }
+.tl-time { font-size: 0.72rem; font-weight: 700; color: var(--accent); min-width: 38px; padding-top: 2px; font-family: 'Syne', sans-serif; }
+.tl-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--line2); margin-top: 4px; flex-shrink: 0; }
+.tl-dot.g { background: var(--green); }
+.tl-dot.r { background: var(--red); }
+.tl-dot.o { background: var(--orange); }
+.tl-name { font-size: 0.8125rem; font-weight: 600; color: var(--tx); }
+.tl-detail { font-size: 0.7rem; color: var(--tx3); margin-top: 2px; }
+
+/* ═══════════════════════════════════════
+   TABLE PLAN
+═══════════════════════════════════════ */
+.table-plan { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+
+.tbl-item {
+  background: var(--bg3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 13px 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.tbl-item:hover { transform: translateY(-2px); border-color: var(--line2); }
+.tbl-item.free   { border-color: rgba(74,186,122,.25); }
+.tbl-item.busy   { border-color: var(--accent); background: var(--accent-dim); }
+.tbl-item.booked { border-color: rgba(110,168,240,.3); background: var(--blue-bg); }
+
+.tbl-num { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; color: var(--tx); line-height: 1; }
+.tbl-cap { font-size: 0.65rem; color: var(--tx3); margin: 3px 0 7px; }
+.tbl-st  { font-size: 0.68rem; font-weight: 600; }
+
+/* ═══════════════════════════════════════
+   BARS
+═══════════════════════════════════════ */
+.bar-list { display: flex; flex-direction: column; gap: 11px; }
+.bar-row { }
+.bar-lbl { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--tx2); margin-bottom: 4px; }
+.bar-track { height: 5px; background: var(--bg4); border-radius: 3px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 3px; transition: width 1.2s cubic-bezier(.22,1,.36,1); }
+.bf-green { background: var(--green); }
+.bf-orange { background: var(--orange); }
+.bf-red { background: var(--red); }
+.bf-accent { background: var(--accent); }
+
+/* ═══════════════════════════════════════
+   FORM ELEMENTS
+═══════════════════════════════════════ */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.fg { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+.fg.full { grid-column: 1 / -1; }
+.lbl {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--tx2);
+}
+.inp {
+  background: var(--bg3);
+  border: 1px solid var(--line2);
+  border-radius: 8px;
+  padding: 9px 12px;
+  color: var(--tx);
+  font-family: 'Figtree', sans-serif;
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+  width: 100%;
+  -webkit-appearance: none;
+}
+.inp:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+textarea.inp { resize: none; min-height: 80px; line-height: 1.5; }
+select.inp {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7' viewBox='0 0 10 7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239B9791' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+  cursor: pointer;
+}
+
+/* Color swatches */
+.swatch-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.swatch {
+  width: 28px; height: 28px;
+  border-radius: 7px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all var(--transition);
+}
+.swatch:hover, .swatch.sel { border-color: var(--tx); transform: scale(1.1); }
+
+/* Preview */
+.preview-box { border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); }
+.preview-top { padding: 14px 16px; display: flex; align-items: center; gap: 10px; }
+.preview-logo-text { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800; color: white; }
+.preview-body { padding: 16px; background: var(--bg3); }
+.preview-btn { display: inline-block; padding: 7px 16px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; color: white; margin-top: 10px; }
+
+/* SMS preview */
+.sms-bubble {
+  background: var(--bg);
+  border: 1px solid var(--line2);
+  border-radius: 12px;
+  border-bottom-left-radius: 3px;
+  padding: 12px 14px;
+  font-size: 0.8rem;
+  color: var(--tx2);
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+
+/* ═══════════════════════════════════════
+   MODAL
+═══════════════════════════════════════ */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.6);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--bg2);
+  border: 1px solid var(--line2);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: modalIn .2s ease;
+}
+@keyframes modalIn { from { opacity: 0; transform: scale(.95) translateY(10px); } to { opacity: 1; transform: none; } }
+.modal-head {
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-title { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; }
+.modal-close {
+  width: 28px; height: 28px; border-radius: 6px;
+  border: none; background: var(--bg4); color: var(--tx2);
+  cursor: pointer; font-size: 1rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: all var(--transition);
+}
+.modal-close:hover { background: var(--red-bg); color: var(--red); }
+.modal-body { padding: 20px; }
+
+/* ═══════════════════════════════════════
+   TOAST
+═══════════════════════════════════════ */
+.toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 2000; display: flex; flex-direction: column; gap: 8px; }
+.toast {
+  background: var(--bg3);
+  border: 1px solid var(--line2);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--tx);
+  box-shadow: 0 8px 24px rgba(0,0,0,.3);
+  display: flex; align-items: center; gap: 8px;
+  animation: toastIn .25s ease;
+  max-width: 300px;
+}
+.toast.success { border-left: 3px solid var(--green); }
+.toast.error { border-left: 3px solid var(--red); }
+.toast.info { border-left: 3px solid var(--accent); }
+@keyframes toastIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: none; } }
+
+/* ═══════════════════════════════════════
+   SEARCH
+═══════════════════════════════════════ */
+.search-inp {
+  background: var(--bg3);
+  border: 1px solid var(--line2);
+  border-radius: 8px;
+  padding: 7px 12px 7px 30px;
+  color: var(--tx);
+  font-family: 'Figtree', sans-serif;
+  font-size: 0.8rem;
+  outline: none;
+  width: 200px;
+  transition: border-color var(--transition);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234E4D4A' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 10px center;
+}
+.search-inp:focus { border-color: var(--accent); width: 250px; }
+.search-inp::placeholder { color: var(--tx3); }
+
+.filter-row { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+.fbtn {
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--line2);
+  background: var(--bg3);
+  color: var(--tx2);
+  font-family: 'Figtree', sans-serif;
+  transition: all var(--transition);
+}
+.fbtn:hover { border-color: var(--accent); color: var(--accent); }
+.fbtn.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+
+/* ═══════════════════════════════════════
+   COUNTER (booking form)
+═══════════════════════════════════════ */
+.counter {
+  display: flex; align-items: center; gap: 14px;
+  border: 1px solid var(--line2);
+  border-radius: 8px;
+  padding: 7px 12px;
+  background: var(--bg3);
+}
+.ctr-btn {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--line2);
+  background: var(--bg4);
+  color: var(--tx);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .9rem;
+  transition: all var(--transition);
+  line-height: 1;
+}
+.ctr-btn:hover { background: var(--accent-mid); border-color: var(--accent); }
+.ctr-num { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; flex: 1; text-align: center; }
+
+.time-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin-top: 5px; }
+.time-slot {
+  padding: 8px 6px;
+  border: 1px solid var(--line2);
+  border-radius: 7px;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--bg3);
+  color: var(--tx2);
+  transition: all var(--transition);
+  font-family: 'Figtree', sans-serif;
+}
+.time-slot:hover { border-color: var(--accent); color: var(--accent); }
+.time-slot.sel { background: var(--tx); color: var(--bg); border-color: var(--tx); }
+.time-slot.full { opacity: .35; cursor: not-allowed; }
+
+/* Steps in booking modal */
+.steps { display: flex; align-items: center; margin-bottom: 22px; }
+.step-dot {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem; font-weight: 700;
+  flex-shrink: 0;
+  transition: all var(--transition);
+}
+.step-dot.cur { background: var(--tx); color: var(--bg); }
+.step-dot.done { background: var(--green); color: white; }
+.step-dot.todo { background: var(--bg4); color: var(--tx3); }
+.step-line { flex: 1; height: 1px; background: var(--line2); margin: 0 5px; transition: background var(--transition); }
+.step-line.done { background: var(--green); }
+
+.book-section { display: none; }
+.book-section.active { display: block; }
+
+/* Confirm screen */
+.confirm-screen { text-align: center; padding: 20px 0; }
+.check-ico { width: 56px; height: 56px; background: var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 1.5rem; animation: pop .4s cubic-bezier(.26,.53,.74,1.48); }
+@keyframes pop { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.conf-title { font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 800; margin-bottom: 8px; }
+.conf-sub { font-size: 0.875rem; color: var(--tx2); line-height: 1.6; margin-bottom: 18px; }
+.conf-ref { display: inline-block; background: var(--accent-dim); color: var(--accent); padding: 5px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; letter-spacing: .06em; margin-bottom: 18px; }
+.conf-summary { text-align: left; background: var(--bg3); border-radius: var(--radius); padding: 14px; border: 1px solid var(--line); }
+.cs-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 0.8rem; }
+.cs-row:last-child { border-bottom: none; }
+.cs-lbl { color: var(--tx2); }
+.cs-val { font-weight: 600; color: var(--tx); }
+
+/* ═══════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════ */
+@media (max-width: 1024px) {
+  .stats-row { grid-template-columns: repeat(2,1fr); }
+  .g2, .g3 { grid-template-columns: 1fr; }
+  .table-plan { grid-template-columns: repeat(3,1fr); }
+}
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .stats-row { grid-template-columns: 1fr 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ SIDEBAR ═══════════ -->
+<aside class="sidebar">
+  <div class="logo-area">
+    <div class="logo">Table<em>Vite</em></div>
+    <div class="logo-tag">Anti No-Show Pro</div>
+  </div>
+
+  <nav class="nav">
+    <div class="nav-group-label">Principal</div>
+    <button class="nav-btn active" onclick="showPage('today',this)">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" stroke-width="1.5"/><path d="M16 2v4M8 2v4M3 10h18" stroke-width="1.5"/></svg>
+      Aujourd'hui
+      <span class="nav-count" id="badge-today">8</span>
+    </button>
+    <button class="nav-btn" onclick="showPage('booking',this)">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 5v14M5 12h14" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Nouvelle réservation
+    </button>
+    <button class="nav-btn" onclick="showPage('tables',this)">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="2" y="7" width="20" height="10" rx="2" stroke-width="1.5"/><path d="M6 7V5M18 7V5M6 17v2M18 17v2" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Plan de salle
+    </button>
+
+    <div class="nav-group-label">Analyse</div>
+    <button class="nav-btn" onclick="showPage('noshow',this)">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M3 17l4-8 4 4 4-6 4 5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Stats No-show
+    </button>
+    <button class="nav-btn" onclick="showPage('history',this)">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="9" stroke-width="1.5"/><path d="M12 7v5l3 3" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Historique
+    </button>
+
+    <div class="nav-group-label">Configuration</div>
+    <button class="nav-btn" onclick="showPage('settings',this)">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="3" stroke-width="1.5"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" stroke-width="1.5"/></svg>
+      Paramètres
+    </button>
+  </nav>
+
+  <div class="sidebar-bottom">
+    <div class="restaurant-card" onclick="showPage('settings', document.querySelector('[onclick*=\"settings\"]'))">
+      <div class="rest-avatar" id="rest-avatar">LB</div>
+      <div class="rest-info">
+        <div class="rest-name" id="rest-name">Le Belvédère</div>
+        <div class="rest-sub">Lausanne · Plan Pro</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══════════ MAIN ═══════════ -->
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1 id="page-title">Réservations du jour</h1>
+      <span id="page-date"></span>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn" onclick="toggleTheme()" title="Thème">
+        <span id="theme-ico">☀️</span>
+      </button>
+      <button class="btn-accent" onclick="openBookingModal()">
+        + Réservation
+      </button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ═══ PAGE TODAY ═══ -->
+    <div class="page active" id="page-today">
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-top">
+            <div class="stat-ico" style="background:var(--accent-dim)">🍽️</div>
+            <span class="stat-pill pill-up">+3 vs hier</span>
+          </div>
+          <div class="stat-val" id="s-total">12</div>
+          <div class="stat-lbl">Réservations aujourd'hui</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top">
+            <div class="stat-ico" style="background:var(--green-bg)">✅</div>
+            <span class="stat-pill pill-up">92%</span>
+          </div>
+          <div class="stat-val" id="s-confirmed">9</div>
+          <div class="stat-lbl">Confirmées</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top">
+            <div class="stat-ico" style="background:var(--orange-bg)">📱</div>
+            <span class="stat-pill pill-neutral">SMS envoyés</span>
+          </div>
+          <div class="stat-val" id="s-pending">2</div>
+          <div class="stat-lbl">En attente réponse</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top">
+            <div class="stat-ico" style="background:var(--red-bg)">❌</div>
+            <span class="stat-pill pill-down">1 no-show</span>
+          </div>
+          <div class="stat-val" id="s-cancelled">1</div>
+          <div class="stat-lbl">Annulations</div>
+        </div>
+      </div>
+
+      <div class="g3">
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Réservations du jour</div>
+              <div class="card-sub" id="card-date-sub"></div>
+            </div>
+            <div style="display:flex;gap:5px">
+              <button class="fbtn active" onclick="filterToday('all',this)">Tout</button>
+              <button class="fbtn" onclick="filterToday('midi',this)">Midi</button>
+              <button class="fbtn" onclick="filterToday('soir',this)">Soir</button>
+            </div>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Heure</th><th>Client</th><th>Couverts</th><th>Occasion</th><th>Statut</th><th>Actions</th></tr></thead>
+              <tbody id="today-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Prochaines arrivées</div>
+              <div class="card-sub">Live</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="timeline" id="timeline"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PAGE BOOKING ═══ -->
+    <div class="page" id="page-booking">
+      <div style="max-width:560px">
+        <div class="card">
+          <div class="card-head"><div class="card-title">Nouvelle réservation manuelle</div></div>
+          <div class="card-body" id="booking-body">
+            <!-- Steps -->
+            <div class="steps" id="bk-steps">
+              <div class="step-dot cur" id="bdot-1">1</div>
+              <div class="step-line" id="bline-1"></div>
+              <div class="step-dot todo" id="bdot-2">2</div>
+              <div class="step-line" id="bline-2"></div>
+              <div class="step-dot todo" id="bdot-3">3</div>
+            </div>
+
+            <!-- Step 1 -->
+            <div class="book-section active" id="bs-1">
+              <div class="fg"><label class="lbl">Date</label><input type="date" class="inp" id="bk-date"></div>
+              <div class="fg">
+                <label class="lbl">Couverts</label>
+                <div class="counter">
+                  <button class="ctr-btn" onclick="changeGuests(-1)">−</button>
+                  <span class="ctr-num" id="bk-guests">2</span>
+                  <button class="ctr-btn" onclick="changeGuests(1)">+</button>
+                </div>
+              </div>
+              <div class="fg">
+                <label class="lbl">Créneau</label>
+                <div class="time-grid" id="bk-slots"></div>
+              </div>
+              <button class="btn-accent" style="width:100%;justify-content:center;margin-top:8px" id="bk-next1" onclick="bookStep(2)" disabled>Continuer →</button>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="book-section" id="bs-2">
+              <div class="form-grid">
+                <div class="fg"><label class="lbl">Prénom</label><input class="inp" id="bk-fname" placeholder="Marie"></div>
+                <div class="fg"><label class="lbl">Nom</label><input class="inp" id="bk-lname" placeholder="Dupont"></div>
+                <div class="fg"><label class="lbl">Email</label><input class="inp" type="email" id="bk-email" placeholder="marie@exemple.ch"></div>
+                <div class="fg"><label class="lbl">Téléphone</label><input class="inp" id="bk-phone" placeholder="+41 79 000 00 00"></div>
+              </div>
+              <div class="fg">
+                <label class="lbl">Occasion spéciale</label>
+                <select class="inp" id="bk-occasion">
+                  <option value="">— Aucune —</option>
+                  <option>🎂 Anniversaire</option>
+                  <option>💍 Fiançailles</option>
+                  <option>💼 Repas d'affaires</option>
+                  <option>🎉 Célébration</option>
+                </select>
+              </div>
+              <div class="fg"><label class="lbl">Commentaire</label><textarea class="inp" id="bk-comment" placeholder="Allergies, préférences…"></textarea></div>
+              <div style="display:flex;gap:8px">
+                <button class="btn-sm" style="flex:1" onclick="bookStep(1)">← Retour</button>
+                <button class="btn-accent" style="flex:2;justify-content:center" onclick="bookStep(3)">Vérifier →</button>
+              </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="book-section" id="bs-3">
+              <div class="conf-summary" id="bk-summary"></div>
+              <div style="display:flex;gap:8px;margin-top:14px">
+                <button class="btn-sm" style="flex:1" onclick="bookStep(2)">← Modifier</button>
+                <button class="btn-accent" style="flex:2;justify-content:center" onclick="confirmBooking()">✓ Confirmer</button>
+              </div>
+            </div>
+
+            <!-- Confirmation -->
+            <div class="book-section" id="bs-confirm">
+              <div class="confirm-screen">
+                <div class="check-ico">✓</div>
+                <div class="conf-title">Réservation confirmée !</div>
+                <p class="conf-sub">Un SMS de confirmation sera envoyé 2h avant la réservation.</p>
+                <div class="conf-ref" id="bk-ref"></div>
+                <div class="conf-summary" id="bk-conf-summary"></div>
+                <button class="btn-sm" style="margin-top:14px;width:100%" onclick="resetBooking()">Nouvelle réservation</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PAGE TABLES ═══ -->
+    <div class="page" id="page-tables">
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-top"><div class="stat-ico" style="background:var(--accent-dim)">🪑</div></div>
+          <div class="stat-val">12</div><div class="stat-lbl">Tables</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><div class="stat-ico" style="background:var(--green-bg)">✅</div></div>
+          <div class="stat-val" id="t-free">6</div><div class="stat-lbl">Libres</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><div class="stat-ico" style="background:var(--accent-dim)">🍽️</div></div>
+          <div class="stat-val" id="t-busy">3</div><div class="stat-lbl">Occupées</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><div class="stat-ico" style="background:var(--blue-bg)">📅</div></div>
+          <div class="stat-val" id="t-booked">3</div><div class="stat-lbl">Réservées</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <div><div class="card-title">Plan de salle</div><div class="card-sub">Cliquez pour changer le statut</div></div>
+          <div style="display:flex;gap:10px;font-size:.72rem;color:var(--tx3);align-items:center">
+            <span><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:4px"></span>Libre</span>
+            <span><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-right:4px"></span>Occupée</span>
+            <span><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--blue);margin-right:4px"></span>Réservée</span>
+          </div>
+        </div>
+        <div class="card-body"><div class="table-plan" id="table-plan"></div></div>
+      </div>
+    </div>
+
+    <!-- ═══ PAGE NO-SHOW ═══ -->
+    <div class="page" id="page-noshow">
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-top"><div class="stat-ico" style="background:var(--red-bg)">📉</div><span class="stat-pill pill-up">-2.1%</span></div>
+          <div class="stat-val">8.3%</div><div class="stat-lbl">Taux no-show ce mois</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><div class="stat-ico" style="background:var(--green-bg)">📈</div><span class="stat-pill pill-up">+4%</span></div>
+          <div class="stat-val">91.7%</div><div class="stat-lbl">Taux confirmation SMS</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><div class="stat-ico" style="background:var(--accent-dim)">💰</div></div>
+          <div class="stat-val">1'240</div><div class="stat-lbl">CHF pertes évitées</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><div class="stat-ico" style="background:var(--blue-bg)">📱</div></div>
+          <div class="stat-val">147</div><div class="stat-lbl">SMS envoyés ce mois</div>
+        </div>
+      </div>
+
+      <div class="g2">
+        <div class="card">
+          <div class="card-head"><div class="card-title">No-show par jour</div></div>
+          <div class="card-body">
+            <div class="bar-list" id="noshow-bars"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">Clients à surveiller</div><div class="card-sub">2+ no-shows</div></div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Client</th><th>No-shows</th><th>Dernière fois</th><th>Action</th></tr></thead>
+              <tbody>
+                <tr><td class="td-bold">J. Moreau</td><td><span class="badge bg-red">3×</span></td><td>12/03</td><td><button class="btn-sm red" onclick="toast('J. Moreau bloqué','success')">Bloquer</button></td></tr>
+                <tr><td class="td-bold">K. Schmidt</td><td><span class="badge bg-orange">2×</span></td><td>08/03</td><td><button class="btn-sm" onclick="toast('SMS d\'avertissement envoyé','info')">Avertir</button></td></tr>
+                <tr><td class="td-bold">P. Bernard</td><td><span class="badge bg-orange">2×</span></td><td>01/03</td><td><button class="btn-sm" onclick="toast('SMS d\'avertissement envoyé','info')">Avertir</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PAGE HISTORY ═══ -->
+    <div class="page" id="page-history">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Historique des réservations</div>
+          <input class="search-inp" placeholder="Rechercher..." oninput="filterHistory(this.value)" id="hist-search">
+        </div>
+        <div class="card-body" style="padding-bottom:0">
+          <div class="filter-row">
+            <button class="fbtn active" onclick="setHistFilter('all',this)">Toutes</button>
+            <button class="fbtn" onclick="setHistFilter('confirmee',this)">Confirmées</button>
+            <button class="fbtn" onclick="setHistFilter('annulee',this)">Annulées</button>
+            <button class="fbtn" onclick="setHistFilter('no_show',this)">No-show</button>
+          </div>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Date</th><th>Client</th><th>Tél.</th><th>Couverts</th><th>Occasion</th><th>Statut</th></tr></thead>
+            <tbody id="hist-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PAGE SETTINGS ═══ -->
+    <div class="page" id="page-settings">
+      <div class="g2">
+        <!-- Restaurant info -->
+        <div class="card">
+          <div class="card-head"><div class="card-title">Informations du restaurant</div></div>
+          <div class="card-body">
+            <div class="form-grid">
+              <div class="fg"><label class="lbl">Nom</label><input class="inp" id="set-name" value="Le Belvédère" oninput="updatePreview()"></div>
+              <div class="fg"><label class="lbl">Ville</label><input class="inp" value="Lausanne"></div>
+              <div class="fg"><label class="lbl">Téléphone</label><input class="inp" value="+41 21 000 00 00"></div>
+              <div class="fg"><label class="lbl">Email</label><input class="inp" value="contact@belvedere.ch"></div>
+            </div>
+            <div class="fg"><label class="lbl">Adresse</label><input class="inp" value="Rue du Lac 12, 1006 Lausanne"></div>
+            <button class="btn-accent" style="width:100%;justify-content:center;margin-top:6px" onclick="saveSetting(this)">💾 Sauvegarder</button>
+          </div>
+        </div>
+
+        <!-- Couleurs -->
+        <div class="card">
+          <div class="card-head"><div class="card-title">Couleur du restaurant</div><div class="card-sub">Formulaire client + SMS</div></div>
+          <div class="card-body">
+            <div class="fg">
+              <label class="lbl">Palette</label>
+              <div class="swatch-row">
+                <div class="swatch sel" style="background:#E8B86D" onclick="setAccent('#E8B86D',this)"></div>
+                <div class="swatch" style="background:#2D6E4E" onclick="setAccent('#2D6E4E',this)"></div>
+                <div class="swatch" style="background:#8B3A2A" onclick="setAccent('#8B3A2A',this)"></div>
+                <div class="swatch" style="background:#1A3A6E" onclick="setAccent('#1A3A6E',this)"></div>
+                <div class="swatch" style="background:#5A3A8E" onclick="setAccent('#5A3A8E',this)"></div>
+                <div class="swatch" style="background:#1A6E6E" onclick="setAccent('#1A6E6E',this)"></div>
+                <div class="swatch" style="background:#8E1A3A" onclick="setAccent('#8E1A3A',this)"></div>
+                <div style="display:flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--line2);border-radius:7px;padding:4px 9px;flex:1">
+                  <input type="color" id="custom-color" value="#E8B86D" oninput="setAccent(this.value,null)" style="width:22px;height:22px;border:none;background:none;cursor:pointer;padding:0">
+                  <span style="font-size:.75rem;color:var(--tx2);font-family:monospace" id="color-hex">#E8B86D</span>
+                </div>
+              </div>
+            </div>
+            <div class="fg" style="margin-top:16px">
+              <label class="lbl">Aperçu</label>
+              <div class="preview-box">
+                <div class="preview-top" id="prev-top" style="background:#E8B86D">
+                  <div class="preview-logo-text" id="prev-name">Le Belvédère</div>
+                </div>
+                <div class="preview-body">
+                  <div style="font-size:.78rem;color:var(--tx2)">Réservez votre table en ligne</div>
+                  <div class="preview-btn" id="prev-btn" style="background:#E8B86D">Réserver maintenant</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SMS -->
+        <div class="card">
+          <div class="card-head"><div class="card-title">Message SMS</div><div class="card-sub">Variables : {prenom} {restaurant} {heure} {couverts}</div></div>
+          <div class="card-body">
+            <div class="fg"><label class="lbl">Template</label><textarea class="inp" id="sms-tpl" rows="4" oninput="updateSMSPreview()">Bonjour {prenom}, rappel de votre réservation chez {restaurant} aujourd'hui à {heure} pour {couverts} personne(s). Confirmez-vous ?</textarea></div>
+            <div class="fg"><label class="lbl">Signature</label><input class="inp" id="sms-sig" value="L'équipe du Belvédère" oninput="updateSMSPreview()"></div>
+            <div class="fg">
+              <label class="lbl">Aperçu SMS</label>
+              <div class="sms-bubble" id="sms-preview"></div>
+            </div>
+            <div class="fg"><label class="lbl">Délai d'envoi</label>
+              <select class="inp">
+                <option>1h avant</option>
+                <option selected>2h avant</option>
+                <option>3h avant</option>
+                <option>24h avant</option>
+              </select>
+            </div>
+            <button class="btn-accent" style="width:100%;justify-content:center" onclick="saveSetting(this)">💾 Sauvegarder</button>
+          </div>
+        </div>
+
+        <!-- Horaires -->
+        <div class="card">
+          <div class="card-head"><div class="card-title">Horaires & créneaux</div></div>
+          <div class="card-body">
+            <div class="fg"><label class="lbl">Service midi</label>
+              <div style="display:flex;gap:8px;align-items:center">
+                <input class="inp" value="12:00" style="width:90px">
+                <span style="color:var(--tx3)">→</span>
+                <input class="inp" value="14:30" style="width:90px">
+              </div>
+            </div>
+            <div class="fg"><label class="lbl">Service soir</label>
+              <div style="display:flex;gap:8px;align-items:center">
+                <input class="inp" value="19:00" style="width:90px">
+                <span style="color:var(--tx3)">→</span>
+                <input class="inp" value="22:30" style="width:90px">
+              </div>
+            </div>
+            <div class="fg"><label class="lbl">Durée créneau</label>
+              <select class="inp"><option>15 min</option><option selected>30 min</option><option>1h</option></select>
+            </div>
+            <div class="fg"><label class="lbl">Nombre de tables</label>
+              <input class="inp" type="number" value="12" min="1" max="100">
+            </div>
+            <button class="btn-accent" style="width:100%;justify-content:center" onclick="saveSetting(this)">💾 Sauvegarder</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</main>
+
+<!-- ═══════════ TOAST CONTAINER ═══════════ -->
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// ═══════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════
+let reservations = [
+  { id:'r1', prenom:'Sophie', nom:'Martin', email:'sophie@mail.ch', telephone:'+41791234567', date:'2026-03-18', heure:'12:00', guests:2, occasion:'🎂 Anniversaire', comment:'', statut:'confirmee', sms:true, confirmed:true, service:'midi' },
+  { id:'r2', prenom:'Marc', nom:'Dupont', email:'marc@mail.ch', telephone:'+41764321098', date:'2026-03-18', heure:'12:30', guests:4, occasion:'', comment:'Sans gluten', statut:'confirmee', sms:true, confirmed:null, service:'midi' },
+  { id:'r3', prenom:'Anna', nom:'Müller', email:'anna@mail.ch', telephone:'+41793214567', date:'2026-03-18', heure:'13:00', guests:3, occasion:'💼 Repas d\'affaires', comment:'', statut:'confirmee', sms:false, confirmed:null, service:'midi' },
+  { id:'r4', prenom:'Jean-Pierre', nom:'Roy', email:'jp@mail.ch', telephone:'+41786543210', date:'2026-03-18', heure:'13:30', guests:6, occasion:'', comment:'Terrasse svp', statut:'confirmee', sms:false, confirmed:null, service:'midi' },
+  { id:'r5', prenom:'Léa', nom:'Bonnet', email:'lea@mail.ch', telephone:'+41777654321', date:'2026-03-18', heure:'19:00', guests:2, occasion:'💍 Fiançailles', comment:'Champagne svp', statut:'confirmee', sms:true, confirmed:true, service:'soir' },
+  { id:'r6', prenom:'Thomas', nom:'Weber', email:'thomas@mail.ch', telephone:'+41761112233', date:'2026-03-18', heure:'19:30', guests:4, occasion:'', comment:'', statut:'confirmee', sms:true, confirmed:null, service:'soir' },
+  { id:'r7', prenom:'Claire', nom:'Rousseau', email:'claire@mail.ch', telephone:'+41794445566', date:'2026-03-18', heure:'20:00', guests:2, occasion:'', comment:'', statut:'annulee', sms:true, confirmed:false, service:'soir' },
+  { id:'r8', prenom:'Pierre', nom:'Lambert', email:'pierre@mail.ch', telephone:'+41787778899', date:'2026-03-18', heure:'20:30', guests:5, occasion:'🎉 Célébration', comment:'Gâteau prévu', statut:'confirmee', sms:true, confirmed:null, service:'soir' },
+];
+
+const history = [
+  { prenom:'Sophie', nom:'Martin', tel:'+41791234567', date:'17/03/2026', heure:'20:00', guests:2, occasion:'🎂 Anniversaire', statut:'confirmee' },
+  { prenom:'J.', nom:'Moreau', tel:'+41769876543', date:'17/03/2026', heure:'19:30', guests:4, occasion:'', statut:'no_show' },
+  { prenom:'Marc', nom:'Dupont', tel:'+41764321098', date:'16/03/2026', heure:'12:30', guests:3, occasion:'', statut:'annulee' },
+  { prenom:'Anna', nom:'Müller', tel:'+41793214567', date:'16/03/2026', heure:'20:30', guests:5, occasion:'💼 Repas d\'affaires', statut:'confirmee' },
+  { prenom:'Léa', nom:'Bonnet', tel:'+41777654321', date:'15/03/2026', heure:'19:00', guests:2, occasion:'💍 Fiançailles', statut:'confirmee' },
+  { prenom:'K.', nom:'Schmidt', tel:'+41761112233', date:'15/03/2026', heure:'20:00', guests:3, occasion:'', statut:'no_show' },
+  { prenom:'Thomas', nom:'Weber', tel:'+41761112234', date:'14/03/2026', heure:'19:30', guests:6, occasion:'🎉 Célébration', statut:'confirmee' },
+  { prenom:'Pierre', nom:'Lambert', tel:'+41787778899', date:'14/03/2026', heure:'20:30', guests:4, occasion:'', statut:'confirmee' },
+];
+
+const tablesData = [
+  { num:1, cap:6, status:'busy', name:'Lambert' },
+  { num:2, cap:2, status:'free' },
+  { num:3, cap:4, status:'booked', name:'Bonnet 19h' },
+  { num:4, cap:4, status:'busy', name:'Sophie M.' },
+  { num:5, cap:2, status:'free' },
+  { num:6, cap:8, status:'booked', name:'Weber 19h30' },
+  { num:7, cap:2, status:'free' },
+  { num:8, cap:4, status:'busy', name:'Anna M.' },
+  { num:9, cap:6, status:'free' },
+  { num:10, cap:2, status:'busy', name:'Marc D.' },
+  { num:11, cap:4, status:'booked', name:'Lambert 20h30' },
+  { num:12, cap:8, status:'free' },
+];
+
+// ═══════════════════════════════════════
+// BOOKING STATE
+// ═══════════════════════════════════════
+let bk = { step:1, guests:2, date:'', time:'', service:'midi' };
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+const now = new Date();
+const dateStr = now.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+document.getElementById('page-date').textContent = dateStr;
+document.getElementById('card-date-sub').textContent = now.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+// Set tomorrow as default date for booking
+const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
+document.getElementById('bk-date').min = now.toISOString().split('T')[0];
+document.getElementById('bk-date').value = now.toISOString().split('T')[0];
+bk.date = document.getElementById('bk-date').value;
+document.getElementById('bk-date').addEventListener('change', e => { bk.date = e.target.value; });
+
+renderToday();
+renderTimeline();
+renderTables();
+renderHistory();
+renderNoshowBars();
+updateSMSPreview();
+renderSlots();
+
+// ═══════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════
+const pageTitles = {
+  today:'Réservations du jour', booking:'Nouvelle réservation',
+  tables:'Plan de salle', noshow:'Statistiques No-show',
+  history:'Historique clients', settings:'Paramètres du restaurant'
+};
+
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(btn) btn.classList.add('active');
+  document.getElementById('page-title').textContent = pageTitles[id];
+}
+
+// ═══════════════════════════════════════
+// THEME
+// ═══════════════════════════════════════
+function toggleTheme() {
+  const html = document.documentElement;
+  const dark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', dark ? 'light' : 'dark');
+  document.getElementById('theme-ico').textContent = dark ? '🌙' : '☀️';
+}
+
+// ═══════════════════════════════════════
+// TODAY TABLE
+// ═══════════════════════════════════════
+function renderToday(filter='all') {
+  const list = filter === 'all' ? reservations : reservations.filter(r => r.service === filter);
+  const tbody = document.getElementById('today-tbody');
+
+  const total = reservations.length;
+  const conf = reservations.filter(r => r.confirmed === true).length;
+  const pend = reservations.filter(r => r.sms && r.confirmed === null && r.statut !== 'annulee').length;
+  const ann  = reservations.filter(r => r.statut === 'annulee').length;
+  document.getElementById('s-total').textContent = total;
+  document.getElementById('s-confirmed').textContent = conf;
+  document.getElementById('s-pending').textContent = pend;
+  document.getElementById('s-cancelled').textContent = ann;
+  document.getElementById('badge-today').textContent = total;
+
+  tbody.innerHTML = list.map(r => {
+    let badge = '';
+    if(r.statut==='annulee') badge = '<span class="badge bg-red">✗ Annulée</span>';
+    else if(r.statut==='no_show') badge = '<span class="badge bg-red">✗ No-show</span>';
+    else if(r.confirmed===true) badge = '<span class="badge bg-green">✓ Confirmée</span>';
+    else if(r.sms) badge = '<span class="badge bg-orange">⏳ SMS envoyé</span>';
+    else badge = '<span class="badge bg-blue">📅 Réservée</span>';
+
+    const occ = r.occasion ? '<span class="badge bg-blue">'+r.occasion+'</span>' : '—';
+    const actions = r.statut==='annulee'
+      ? '<button class="btn-sm green" onclick="setStatus(\''+r.id+'\',\'confirmee\')">Rétablir</button>'
+      : '<button class="btn-sm red" onclick="setStatus(\''+r.id+'\',\'annulee\')">Annuler</button> <button class="btn-sm" onclick="sendSMS(\''+r.id+'\')">SMS</button>';
+
+    return '<tr><td class="td-accent">'+r.heure+'</td><td class="td-bold">'+r.prenom+' '+r.nom+'</td><td>'+r.guests+' pers.</td><td>'+occ+'</td><td>'+badge+'</td><td style="white-space:nowrap">'+actions+'</td></tr>';
+  }).join('');
+}
+
+function filterToday(f, btn) {
+  document.querySelectorAll('#page-today .fbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderToday(f);
+}
+
+function setStatus(id, st) {
+  const r = reservations.find(x=>x.id===id);
+  if(!r) return;
+  r.statut = st;
+  if(st==='annulee') r.confirmed = false;
+  if(st==='confirmee') r.confirmed = null;
+  renderToday(); renderTimeline();
+  toast(st==='annulee' ? 'Réservation annulée' : 'Réservation rétablie', st==='annulee'?'error':'success');
+}
+
+function sendSMS(id) {
+  const r = reservations.find(x=>x.id===id);
+  if(!r) return;
+  r.sms = true;
+  renderToday();
+  toast('SMS envoyé à '+r.prenom+' '+r.nom, 'success');
+}
+
+// ═══════════════════════════════════════
+// TIMELINE
+// ═══════════════════════════════════════
+function renderTimeline() {
+  const upcoming = reservations.filter(r=>r.statut!=='annulee').slice(0,6);
+  document.getElementById('timeline').innerHTML = upcoming.map(r => {
+    const dot = r.confirmed===true ? 'g' : r.statut==='annulee' ? 'r' : r.sms ? 'o' : '';
+    return '<div class="tl-item"><div class="tl-time">'+r.heure+'</div><div class="tl-dot '+dot+'"></div><div><div class="tl-name">'+r.prenom+' '+r.nom+'</div><div class="tl-detail">'+r.guests+' pers.'+(r.occasion?' · '+r.occasion:'')+'</div></div></div>';
+  }).join('');
+}
+
+// ═══════════════════════════════════════
+// TABLES
+// ═══════════════════════════════════════
+function renderTables() {
+  const free = tablesData.filter(t=>t.status==='free').length;
+  const busy = tablesData.filter(t=>t.status==='busy').length;
+  const booked = tablesData.filter(t=>t.status==='booked').length;
+  document.getElementById('t-free').textContent = free;
+  document.getElementById('t-busy').textContent = busy;
+  document.getElementById('t-booked').textContent = booked;
+
+  document.getElementById('table-plan').innerHTML = tablesData.map((t,i) => {
+    const stLabel = t.status==='busy' ? '<span style="color:var(--accent)">Occupée</span>' : t.status==='booked' ? '<span style="color:var(--blue)">Réservée</span>' : '<span style="color:var(--green)">Libre</span>';
+    return '<div class="tbl-item '+t.status+'" onclick="cycleTable('+i+')"><div class="tbl-num">'+t.num+'</div><div class="tbl-cap">'+t.cap+' couverts</div><div class="tbl-st">'+stLabel+'</div>'+(t.name?'<div style="font-size:.65rem;color:var(--tx3);margin-top:3px">'+t.name+'</div>':'')+'</div>';
+  }).join('');
+}
+
+function cycleTable(i) {
+  const c = ['free','busy','booked'];
+  tablesData[i].status = c[(c.indexOf(tablesData[i].status)+1)%3];
+  renderTables();
+}
+
+// ═══════════════════════════════════════
+// NO-SHOW BARS
+// ═══════════════════════════════════════
+function renderNoshowBars() {
+  const days = [
+    {d:'Lundi', v:3, cls:'bf-green'},
+    {d:'Mardi', v:5, cls:'bf-green'},
+    {d:'Mercredi', v:7, cls:'bf-accent'},
+    {d:'Jeudi', v:6, cls:'bf-accent'},
+    {d:'Vendredi', v:12, cls:'bf-orange'},
+    {d:'Samedi', v:15, cls:'bf-red'},
+    {d:'Dimanche', v:9, cls:'bf-accent'},
+  ];
+  document.getElementById('noshow-bars').innerHTML = days.map(d =>
+    '<div class="bar-row"><div class="bar-lbl"><span>'+d.d+'</span><span>'+d.v+'%</span></div><div class="bar-track"><div class="bar-fill '+d.cls+'" style="width:0%" data-w="'+d.v+'%"></div></div></div>'
+  ).join('');
+  // Animate bars after render
+  setTimeout(() => {
+    document.querySelectorAll('.bar-fill[data-w]').forEach(el => {
+      el.style.width = el.dataset.w;
+    });
+  }, 100);
+}
+
+// ═══════════════════════════════════════
+// HISTORY
+// ═══════════════════════════════════════
+let histFilter = 'all';
+
+function renderHistory(query='') {
+  const q = query.toLowerCase();
+  const list = history.filter(r => {
+    const matchF = histFilter==='all' || r.statut===histFilter;
+    const matchQ = !q || (r.prenom+' '+r.nom+r.tel).toLowerCase().includes(q);
+    return matchF && matchQ;
+  });
+  const tbody = document.getElementById('hist-tbody');
+  if(!list.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:28px;color:var(--tx3)">Aucun résultat</td></tr>'; return; }
+  tbody.innerHTML = list.map(r => {
+    let badge = '';
+    if(r.statut==='no_show') badge = '<span class="badge bg-red">✗ No-show</span>';
+    else if(r.statut==='annulee') badge = '<span class="badge bg-muted">Annulée</span>';
+    else badge = '<span class="badge bg-green">✓ Présente</span>';
+    const occ = r.occasion ? '<span class="badge bg-blue">'+r.occasion+'</span>' : '—';
+    return '<tr><td>'+r.date+' · '+r.heure+'</td><td class="td-bold">'+r.prenom+' '+r.nom+'</td><td>'+r.tel+'</td><td>'+r.guests+'</td><td>'+occ+'</td><td>'+badge+'</td></tr>';
+  }).join('');
+}
+
+function setHistFilter(f, btn) {
+  histFilter = f;
+  document.querySelectorAll('#page-history .fbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderHistory(document.getElementById('hist-search').value);
+}
+
+function filterHistory(q) { renderHistory(q); }
+
+// ═══════════════════════════════════════
+// BOOKING FLOW
+// ═══════════════════════════════════════
+const allSlots = ['12:00','12:30','13:00','13:30','14:00','19:00','19:30','20:00','20:30','21:00','21:30'];
+const fullSlots = ['13:00','20:00'];
+
+function renderSlots() {
+  document.getElementById('bk-slots').innerHTML = allSlots.map(t => {
+    const full = fullSlots.includes(t);
+    return '<button class="time-slot'+(full?' full':'')+'" '+(full?'disabled':'')+' onclick="selectSlot(\''+t+'\',this)">'+t+'</button>';
+  }).join('');
+}
+
+function selectSlot(t, el) {
+  bk.time = t;
+  bk.service = parseInt(t) < 16 ? 'midi' : 'soir';
+  document.querySelectorAll('.time-slot').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+  document.getElementById('bk-next1').disabled = false;
+}
+
+let bkGuests = 2;
+function changeGuests(d) {
+  bkGuests = Math.min(20, Math.max(1, bkGuests+d));
+  document.getElementById('bk-guests').textContent = bkGuests;
+}
+
+function bookStep(n) {
+  if(n===2) {
+    if(!bk.time) { toast('Sélectionnez un créneau','error'); return; }
+  }
+  if(n===3) {
+    const f = document.getElementById('bk-fname').value.trim();
+    const l = document.getElementById('bk-lname').value.trim();
+    const e = document.getElementById('bk-email').value.trim();
+    const p = document.getElementById('bk-phone').value.trim();
+    if(!f||!l||!e||!p) { toast('Remplissez tous les champs','error'); return; }
+    if(!/\S+@\S+\.\S+/.test(e)) { toast('Email invalide','error'); return; }
+    buildSummary();
+  }
+  bk.step = n;
+  document.querySelectorAll('.book-section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('bs-'+n).classList.add('active');
+  updateStepDots();
+}
+
+function updateStepDots() {
+  [1,2,3].forEach(i => {
+    const dot = document.getElementById('bdot-'+i);
+    const line = document.getElementById('bline-'+i);
+    dot.className = 'step-dot ' + (i < bk.step ? 'done' : i===bk.step ? 'cur' : 'todo');
+    dot.textContent = i < bk.step ? '✓' : i;
+    if(line) line.className = 'step-line ' + (i < bk.step ? 'done' : '');
+  });
+}
+
+function buildSummary() {
+  const dateF = new Date(bk.date+'T12:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+  const rows = [
+    {l:'Restaurant', v:'Le Belvédère'},
+    {l:'Date', v:dateF},
+    {l:'Heure', v:bk.time},
+    {l:'Couverts', v:bkGuests+' personne'+(bkGuests>1?'s':'')},
+    {l:'Nom', v:document.getElementById('bk-fname').value+' '+document.getElementById('bk-lname').value},
+    {l:'Téléphone', v:document.getElementById('bk-phone').value},
+  ];
+  const occ = document.getElementById('bk-occasion').value;
+  if(occ) rows.push({l:'Occasion', v:occ});
+  const html = rows.map(r=>'<div class="cs-row"><span class="cs-lbl">'+r.l+'</span><span class="cs-val">'+r.v+'</span></div>').join('');
+  document.getElementById('bk-summary').innerHTML = html;
+  document.getElementById('bk-conf-summary').innerHTML = html;
+}
+
+function confirmBooking() {
+  const ref = 'TBL-'+Math.random().toString(36).substr(2,6).toUpperCase();
+  document.getElementById('bk-ref').textContent = 'Réf. '+ref;
+
+  // Add to today's list
+  const newR = {
+    id: 'r'+Date.now(),
+    prenom: document.getElementById('bk-fname').value.trim(),
+    nom: document.getElementById('bk-lname').value.trim(),
+    email: document.getElementById('bk-email').value.trim(),
+    telephone: document.getElementById('bk-phone').value.trim(),
+    date: bk.date,
+    heure: bk.time,
+    guests: bkGuests,
+    occasion: document.getElementById('bk-occasion').value,
+    comment: document.getElementById('bk-comment').value,
+    statut: 'confirmee',
+    sms: false,
+    confirmed: null,
+    service: bk.service
+  };
+  reservations.push(newR);
+  renderToday(); renderTimeline();
+
+  document.querySelectorAll('.book-section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('bs-confirm').classList.add('active');
+  [1,2,3].forEach(i=>{
+    document.getElementById('bdot-'+i).className='step-dot done';
+    document.getElementById('bdot-'+i).textContent='✓';
+    if(document.getElementById('bline-'+i)) document.getElementById('bline-'+i).className='step-line done';
+  });
+  toast('Réservation ajoutée avec succès !','success');
+}
+
+function resetBooking() {
+  bk = {step:1, guests:2, date:document.getElementById('bk-date').value, time:'', service:'midi'};
+  bkGuests = 2;
+  document.getElementById('bk-guests').textContent = '2';
+  document.getElementById('bk-fname').value=''; document.getElementById('bk-lname').value='';
+  document.getElementById('bk-email').value=''; document.getElementById('bk-phone').value='';
+  document.getElementById('bk-occasion').value=''; document.getElementById('bk-comment').value='';
+  document.getElementById('bk-next1').disabled = true;
+  document.querySelectorAll('.time-slot').forEach(s=>s.classList.remove('sel'));
+  document.querySelectorAll('.book-section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('bs-1').classList.add('active');
+  updateStepDots();
+}
+
+function openBookingModal() { showPage('booking', document.querySelector('[onclick*="booking"]')); }
+
+// ═══════════════════════════════════════
+// SETTINGS
+// ═══════════════════════════════════════
+function setAccent(hex, el) {
+  document.documentElement.style.setProperty('--accent', hex);
+  const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+  document.documentElement.style.setProperty('--accent-dim','rgba('+r+','+g+','+b+',.12)');
+  document.documentElement.style.setProperty('--accent-mid','rgba('+r+','+g+','+b+',.25)');
+  document.getElementById('color-hex').textContent = hex;
+  document.getElementById('custom-color').value = hex;
+  document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('sel'));
+  if(el) el.classList.add('sel');
+  updatePreview(hex);
+}
+
+function updatePreview(hex) {
+  const color = hex || document.getElementById('custom-color').value;
+  const name = document.getElementById('set-name').value || 'Mon Restaurant';
+  document.getElementById('prev-top').style.background = color;
+  document.getElementById('prev-btn').style.background = color;
+  document.getElementById('prev-name').textContent = name;
+  const ini = name.split(' ').map(w=>w[0]||'').join('').slice(0,2).toUpperCase();
+  document.getElementById('rest-avatar').textContent = ini;
+  document.getElementById('rest-name').textContent = name;
+}
+
+function updateSMSPreview() {
+  const tpl = document.getElementById('sms-tpl').value;
+  const sig = document.getElementById('sms-sig').value;
+  const name = document.getElementById('set-name')?.value || 'Le Belvédère';
+  const msg = tpl.replace('{prenom}','Sophie').replace('{restaurant}',name).replace('{heure}','19:30').replace('{couverts}','2');
+  document.getElementById('sms-preview').textContent = msg + '\n\nOUI : [lien]\nNON : [lien]\n\n' + sig;
+}
+
+function saveSetting(btn) {
+  const orig = btn.textContent;
+  btn.textContent = '✓ Sauvegardé !';
+  btn.style.background = 'var(--green)';
+  setTimeout(()=>{ btn.textContent=orig; btn.style.background=''; },2000);
+  toast('Paramètres sauvegardés','success');
+}
+
+// ═══════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════
+function toast(msg, type='info') {
+  const icons = { success:'✓', error:'✕', info:'ℹ' };
+  const div = document.createElement('div');
+  div.className = 'toast '+type;
+  div.innerHTML = '<span>'+icons[type]+'</span> '+msg;
+  document.getElementById('toast-container').appendChild(div);
+  setTimeout(()=>{ div.style.opacity='0'; div.style.transform='translateX(20px)'; div.style.transition='.3s'; setTimeout(()=>div.remove(),300); }, 3000);
+}
+</script>
+</body>
+</html>
